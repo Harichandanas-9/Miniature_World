@@ -75,3 +75,99 @@ ASMR_TEMPLATES = [
 ]
 
 def build_video_prompt(user_input: str) -> str:
+    parts = user_input.replace("–", "-").replace("—", "-").split("-", 1)
+    scene   = parts[0].strip()
+    actions = parts[1].strip() if len(parts) > 1 else "work with tiny tools and objects"
+    return random.choice(ASMR_TEMPLATES).format(scene=scene, actions=actions)
+
+HF_MODEL_URL = (
+    "https://api-inference.huggingface.co/models/"
+    "damo-vilab/text-to-video-ms-1.7b"
+)
+
+async def generate_video(prompt: str) -> str:
+    headers = {
+        "Authorization": f"Bearer {HF_TOKEN}",
+        "Content-Type": "application/json",
+    }
+    payload = {
+        "inputs": prompt,
+        "parameters": {"num_frames": 40, "num_inference_steps": 25},
+    }
+    async with _make_client(timeout=300) as client:
+        for _ in range(3):
+            resp = await client.post(HF_MODEL_URL, json=payload, headers=headers)
+            if resp.status_code == 503:
+                wait = int(resp.headers.get("X-Wait-For-Model", "20"))
+                await asyncio.sleep(min(wait, 30))
+                continue
+            resp.raise_for_status()
+            video_bytes = resp.content
+            if not video_bytes:
+                raise RuntimeError("HuggingFace returned empty video.")
+            filename = f"{uuid.uuid4().hex}.mp4"
+            path = os.path.join("static", "videos", filename)
+            with open(path, "wb") as f:
+                f.write(video_bytes)
+            return f"/static/videos/{filename}"
+    raise TimeoutError("HuggingFace model timed out. Try again in ~30 seconds.")
+
+class ChatRequest(BaseModel):
+    message: str
+
+@app.post("/api/chat")
+async def chat(req: ChatRequest):
+    user_input = req.message.strip()
+    if not user_input:
+        return JSONResponse({"type": "error", "error": "Empty input."}, status_code=400)
+
+    try:
+        if not is_allowed(user_input):
+            return JSONResponse({
+                "type": "refusal",
+                "message": (
+                    "✋ I only create miniature ASMR videos! "
+                    "Try something like: 'tiny bakery - knead dough, shape bread, bake and serve' "
+                    "or 'miniature garden - plant seeds, water soil, watch sprout grow'. "
+                    "Keep it small, cozy, and satisfying 🎋"
+                )
+            })
+
+        video_prompt = build_video_prompt(user_input)
+
+        if DEMO_MODE:
+            return JSONResponse({
+                "type": "demo",
+                "prompt": video_prompt,
+                "message": (
+                    "✅ Guardrails passed! Your ASMR video prompt is ready.\n\n"
+                    "🎬 In production this generates a real video via HuggingFace.\n\n"
+                    f"📝 Prompt:\n{video_prompt}"
+                )
+            })
+
+        try:
+            video_url = await generate_video(video_prompt)
+            return JSONResponse({"type": "video", "prompt": video_prompt, "video_url": video_url})
+        except Exception as hf_err:
+            print(f"[HuggingFace] failed: {hf_err} — falling back to demo response")
+            return JSONResponse({
+                "type": "demo",
+                "prompt": video_prompt,
+                "message": (
+                    "✅ Guardrails passed! Your ASMR video prompt is ready.\n\n"
+                    "🎬 Video generation is temporarily unavailable (HuggingFace free tier limit).\n\n"
+                    f"📝 Prompt that would be used:\n{video_prompt}"
+                )
+            })
+
+    except Exception as e:
+        return JSONResponse({"type": "error", "error": str(e)}, status_code=500)
+
+@app.get("/", response_class=HTMLResponse)
+@app.head("/")
+async def root():
+    with open("static/index.html", encoding="utf-8") as f:
+        return HTMLResponse(f.read())
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
