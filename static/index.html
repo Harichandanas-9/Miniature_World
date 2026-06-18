@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>🎋 Miniature ASMR Bot</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --lav:#C9B8FF;--lav2:#9B7FD4;--lav3:#EDE6FF;
+  --teal:#5EC8C0;--teal2:#3AADA5;--teal3:#D0F5F3;
+  --pink:#FFB8D4;--peach:#FFD4AA;--yellow:#FFE88A;
+  --bg:#F2EEFF;--text:#2D2050;--muted:#8B7BAE;
+  --card:rgba(255,255,255,0.75);--border:rgba(255,255,255,0.9);
+  --shadow:0 8px 32px rgba(124,90,200,0.12);
+  --shadow2:0 4px 16px rgba(94,200,192,0.15);
+}
+html,body{height:100%;font-family:'Segoe UI',system-ui,sans-serif;color:var(--text);overflow:hidden}
+
+/* ── BACKGROUND ── */
+body{
+  background:linear-gradient(135deg,#EDE6FF 0%,#D0F5F3 50%,#FFE8F5 100%);
+  position:relative;
+}
+.bg-orb{position:fixed;border-radius:50%;filter:blur(60px);pointer-events:none;z-index:0}
+.orb1{width:400px;height:400px;background:rgba(201,184,255,0.35);top:-80px;left:-80px;animation:orbFloat 8s ease-in-out infinite}
+.orb2{width:300px;height:300px;background:rgba(94,200,192,0.25);bottom:-60px;right:-60px;animation:orbFloat 10s ease-in-out infinite reverse}
+.orb3{width:200px;height:200px;background:rgba(255,184,212,0.3);top:50%;left:50%;animation:orbFloat 6s ease-in-out infinite 2s}
+@keyframes orbFloat{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(20px,-20px) scale(1.05)}}
+
+/* floating stars */
+.star{position:fixed;pointer-events:none;z-index:0;animation:starTwinkle ease-in-out infinite}
+@keyframes starTwinkle{0%,100%{opacity:.15;transform:scale(.7)}50%{opacity:.7;transform:scale(1.1)}}
+
+/* ── LAYOUT ── */
+.app{position:relative;z-index:1;height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
+
+/* ── CHAT PANEL ── */
+.panel{
+  width:100%;max-width:640px;height:calc(100vh - 32px);max-height:820px;
+  background:var(--card);backdrop-filter:blur(24px);
+  border:1.5px solid var(--border);border-radius:32px;
+  box-shadow:var(--shadow),0 0 0 1px rgba(201,184,255,0.3);
+  display:flex;flex-direction:column;overflow:hidden;
+}
+
+/* ── HEADER ── */
+.header{
+  padding:18px 24px 14px;
+  background:linear-gradient(135deg,rgba(201,184,255,0.4),rgba(208,245,243,0.4));
+  border-bottom:1.5px solid rgba(255,255,255,0.7);
+  display:flex;align-items:center;gap:14px;flex-shrink:0;
+}
+.bot-avatar{
+  width:48px;height:48px;border-radius:16px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--lav),var(--teal));
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.5rem;box-shadow:0 4px 14px rgba(155,127,212,0.35);
+  animation:avatarBob 3s ease-in-out infinite;position:relative;
+}
+.bot-avatar::after{
+  content:'';position:absolute;inset:-3px;border-radius:19px;
+  border:2px solid rgba(255,255,255,0.6);
+}
+@keyframes avatarBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+.bot-status{display:flex;align-items:center;gap:5px;margin-top:2px}
+.status-dot{width:7px;height:7px;border-radius:50%;background:#5EC8C0;
+  box-shadow:0 0 0 2px rgba(94,200,192,0.3);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 2px rgba(94,200,192,0.3)}50%{box-shadow:0 0 0 5px rgba(94,200,192,0.1)}}
+.header-info h1{font-size:1rem;font-weight:800;letter-spacing:.2px}
+.header-info p{font-size:.72rem;color:var(--muted);margin-top:1px}
+.status-text{font-size:.65rem;font-weight:700;color:var(--teal2);text-transform:uppercase;letter-spacing:.8px}
+.header-chips{margin-left:auto;display:flex;gap:6px}
+.chip{
+  padding:5px 11px;border-radius:40px;font-size:.65rem;font-weight:800;
+  letter-spacing:.5px;text-transform:uppercase;border:1.5px solid;
+  background:rgba(255,255,255,.5);cursor:default;
+}
+.chip-lav{color:var(--lav2);border-color:rgba(155,127,212,.3)}
+.chip-teal{color:var(--teal2);border-color:rgba(94,200,192,.3)}
+
+/* ── MESSAGES ── */
+.messages{
+  flex:1;overflow-y:auto;padding:20px 20px 8px;
+  display:flex;flex-direction:column;gap:12px;
+  scrollbar-width:thin;scrollbar-color:rgba(155,127,212,.2) transparent;
+}
+.messages::-webkit-scrollbar{width:4px}
+.messages::-webkit-scrollbar-thumb{background:rgba(155,127,212,.25);border-radius:40px}
+
+.msg{display:flex;flex-direction:column;max-width:85%}
+.msg.user{align-self:flex-end;align-items:flex-end}
+.msg.bot{align-self:flex-start;align-items:flex-start}
+
+/* timestamp */
+.msg-time{font-size:.58rem;color:var(--muted);margin:3px 6px 0;font-weight:600}
+
+.bubble{
+  padding:11px 16px;border-radius:20px;font-size:.875rem;
+  line-height:1.6;position:relative;
+}
+.msg.user .bubble{
+  background:linear-gradient(135deg,var(--lav2),var(--teal2));
+  color:#fff;border-bottom-right-radius:5px;
+  box-shadow:0 4px 16px rgba(155,127,212,.35);
+}
+.msg.bot .bubble{
+  background:rgba(255,255,255,.85);border:1.5px solid rgba(255,255,255,.9);
+  color:var(--text);border-bottom-left-radius:5px;
+  box-shadow:0 3px 14px rgba(124,90,200,.08);
+}
+.msg.bot .bubble.refusal{
+  background:rgba(255,235,240,.85);border-color:rgba(255,150,180,.3);
+}
+.msg.bot .bubble.demo{
+  background:linear-gradient(135deg,rgba(208,245,243,.9),rgba(237,230,255,.9));
+  border-color:rgba(94,200,192,.3);white-space:pre-line;
+}
+
+/* ── VIDEO CARD ── */
+.video-card{
+  background:rgba(255,255,255,.9);border:1.5px solid rgba(255,255,255,.9);
+  border-radius:20px;border-bottom-left-radius:5px;overflow:hidden;
+  box-shadow:0 4px 20px rgba(124,90,200,.12);max-width:400px;
+}
+.video-card video{width:100%;display:block}
+.video-meta{
+  padding:10px 14px;font-size:.72rem;color:var(--muted);line-height:1.5;
+  background:linear-gradient(135deg,rgba(237,230,255,.6),rgba(208,245,243,.6));
+}
+.video-meta strong{color:var(--lav2)}
+
+/* ── TYPING INDICATOR ── */
+.typing{
+  display:flex;align-items:center;gap:10px;
+  background:rgba(255,255,255,.85);border:1.5px solid rgba(255,255,255,.9);
+  border-radius:20px;border-bottom-left-radius:5px;
+  padding:12px 16px;font-size:.8rem;color:var(--muted);
+  box-shadow:0 3px 14px rgba(124,90,200,.08);
+}
+.typing-dots{display:flex;gap:4px}
+.typing-dots span{
+  width:7px;height:7px;border-radius:50%;
+  background:linear-gradient(135deg,var(--lav),var(--teal));
+  animation:typingBounce 1.2s ease-in-out infinite;
+}
+.typing-dots span:nth-child(2){animation-delay:.2s}
+.typing-dots span:nth-child(3){animation-delay:.4s}
+@keyframes typingBounce{0%,80%,100%{transform:translateY(0);opacity:.4}40%{transform:translateY(-7px);opacity:1}}
+
+/* ── SUGGESTIONS ── */
+.suggestions{
+  padding:0 20px 10px;display:flex;gap:8px;overflow-x:auto;flex-shrink:0;
+  scrollbar-width:none;
+}
+.suggestions::-webkit-scrollbar{display:none}
+.sug{
+  flex-shrink:0;padding:6px 14px;border-radius:40px;font-size:.72rem;font-weight:700;
+  border:1.5px solid;cursor:pointer;white-space:nowrap;transition:all .2s;
+  background:rgba(255,255,255,.6);backdrop-filter:blur(8px);
+}
+.sug:nth-child(1){color:var(--lav2);border-color:rgba(155,127,212,.35)}
+.sug:nth-child(2){color:var(--teal2);border-color:rgba(94,200,192,.35)}
+.sug:nth-child(3){color:#D47FAA;border-color:rgba(255,150,180,.35)}
+.sug:nth-child(4){color:#C4900A;border-color:rgba(255,180,60,.35)}
+.sug:hover{transform:translateY(-2px);background:rgba(255,255,255,.9);box-shadow:0 4px 12px rgba(124,90,200,.12)}
+
+/* ── INPUT AREA ── */
+.input-area{
+  padding:12px 16px 16px;flex-shrink:0;
+  border-top:1.5px solid rgba(255,255,255,.6);
+}
+.input-box{
+  display:flex;align-items:flex-end;gap:10px;
+  background:rgba(255,255,255,.7);backdrop-filter:blur(12px);
+  border:1.5px solid rgba(201,184,255,.4);border-radius:20px;
+  padding:10px 10px 10px 16px;
+  transition:border-color .2s,box-shadow .2s;
+}
+.input-box:focus-within{
+  border-color:rgba(155,127,212,.6);
+  box-shadow:0 0 0 4px rgba(201,184,255,.15);
+}
+#userInput{
+  flex:1;background:transparent;border:none;outline:none;
+  color:var(--text);font-size:.875rem;resize:none;
+  max-height:90px;line-height:1.5;font-family:inherit;
+}
+#userInput::placeholder{color:#B0A8CC}
+.input-actions{display:flex;align-items:center;gap:6px}
+.send-btn{
+  width:40px;height:40px;border-radius:14px;border:none;cursor:pointer;flex-shrink:0;
+  background:linear-gradient(135deg,var(--lav2),var(--teal2));
+  color:#fff;font-size:1rem;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 14px rgba(155,127,212,.4);
+  transition:all .2s;
+}
+.send-btn:hover{transform:scale(1.08);box-shadow:0 6px 20px rgba(155,127,212,.5)}
+.send-btn:active{transform:scale(.96)}
+.send-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.hint{
+  font-size:.65rem;color:var(--muted);margin-top:8px;text-align:center;
+  display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.hint code{
+  background:linear-gradient(135deg,rgba(201,184,255,.3),rgba(208,245,243,.3));
+  border:1px solid rgba(201,184,255,.3);color:var(--lav2);
+  padding:2px 7px;border-radius:6px;font-size:.63rem;font-family:inherit;font-weight:700;
+}
+
+/* ── WELCOME BOT MSG ── */
+.welcome-card{
+  background:linear-gradient(135deg,rgba(237,230,255,.9),rgba(208,245,243,.9));
+  border:1.5px solid rgba(255,255,255,.9);border-radius:20px;border-bottom-left-radius:5px;
+  padding:16px 18px;box-shadow:0 3px 14px rgba(124,90,200,.08);
+}
+.welcome-card h3{font-size:.95rem;font-weight:800;margin-bottom:8px;color:var(--text)}
+.welcome-card p{font-size:.8rem;color:var(--muted);line-height:1.6}
+.welcome-card em{color:var(--lav2);font-style:normal;font-weight:700}
+
+/* ── ANIMATIONS ── */
+@keyframes slideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.slide-up{animation:slideUp .3s cubic-bezier(.34,1.1,.64,1) forwards}
+</style>
+</head>
+<body>
+
+<!-- background orbs -->
+<div class="bg-orb orb1"></div>
+<div class="bg-orb orb2"></div>
+<div class="bg-orb orb3"></div>
+
+<div class="app">
+  <div class="panel">
+
+    <!-- HEADER -->
+    <div class="header">
+      <div class="bot-avatar">🎋</div>
+      <div class="header-info">
+        <h1>Miniature ASMR Bot</h1>
+        <div class="bot-status">
+          <div class="status-dot"></div>
+          <span class="status-text">Online · Ready</span>
+        </div>
+        <p>Describe a tiny scene → get a soothing ASMR video</p>
+      </div>
+      <div class="header-chips">
+        <div class="chip chip-lav">✨ ASMR</div>
+        <div class="chip chip-teal">🎬 AI</div>
+      </div>
+    </div>
+
+    <!-- MESSAGES -->
+    <div class="messages" id="messages">
+      <div class="msg bot slide-up">
+        <div class="welcome-card">
+          <h3>Hi! I'm your Miniature ASMR companion 🌿</h3>
+          <p>
+            Give me a single line with keywords and I'll turn it into a satisfying miniature ASMR video.<br><br>
+            Try: <em>"tiny bakery – knead dough, shape bread, bake and serve"</em><br>
+            Or: <em>"miniature garden – plant seeds, water soil, watch it grow"</em><br><br>
+            Keep it small, cozy, and satisfying 🍞✨
+          </p>
+        </div>
+        <div class="msg-time">Just now</div>
+      </div>
+    </div>
+
+    <!-- SUGGESTIONS -->
+    <div class="suggestions" id="suggestions">
+      <div class="sug" onclick="useSuggestion(this)">🏡 tiny bakery – knead, bake, serve</div>
+      <div class="sug" onclick="useSuggestion(this)">🌱 mini garden – plant, water, grow</div>
+      <div class="sug" onclick="useSuggestion(this)">🍵 miniature cafe – brew tea, pour, sip</div>
+      <div class="sug" onclick="useSuggestion(this)">📚 tiny library – sort books, stamp, shelve</div>
+    </div>
+
+    <!-- INPUT -->
+    <div class="input-area">
+      <div class="input-box">
+        <textarea
+          id="userInput"
+          placeholder="tiny scene – action1, action2, action3…"
+          rows="1"
+          oninput="autoResize(this)"
+          onkeydown="handleKey(event)"
+        ></textarea>
+        <div class="input-actions">
+          <button class="send-btn" id="sendBtn" onclick="sendMessage()" title="Generate video">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="white">
+              <path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div class="hint">
+        <span>Format:</span>
+        <code>scene – action1, action2</code>
+        <span>·</span>
+        <span>Video takes ~1–2 min to generate</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ── FLOATING STARS ── */
+const starPool=['✦','✧','⋆','·','✺','✹'];
+for(let i=0;i<20;i++){
+  const s=document.createElement('div');
+  s.className='star';
+  s.textContent=starPool[i%starPool.length];
+  s.style.cssText=`
+    left:${Math.random()*100}%;top:${Math.random()*100}%;
+    font-size:${.6+Math.random()*.8}rem;color:rgba(155,127,212,${.2+Math.random()*.3});
+    animation-duration:${2.5+Math.random()*3}s;
+    animation-delay:${Math.random()*4}s;`;
+  document.body.appendChild(s);
+}
+
+/* ── HELPERS ── */
+const msgs = document.getElementById('messages');
+const input = document.getElementById('userInput');
+const btn   = document.getElementById('sendBtn');
+
+function now(){
+  const d=new Date();
+  return d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+}
+
+function autoResize(el){
+  el.style.height='auto';
+  el.style.height=Math.min(el.scrollHeight,90)+'px';
+}
+
+function handleKey(e){
+  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage()}
+}
+
+function esc(s){
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function appendMsg(role,html,extraClass=''){
+  const wrap=document.createElement('div');
+  wrap.className=`msg ${role} slide-up`;
+  wrap.innerHTML=html;
+  msgs.appendChild(wrap);
+  msgs.scrollTop=msgs.scrollHeight;
+  return wrap;
+}
+
+function useSuggestion(el){
+  input.value=el.textContent.replace(/^[^\s]+\s/,'').trim();
+  input.focus();
+  autoResize(input);
+}
+
+/* ── SEND ── */
+async function sendMessage(){
+  const text=input.value.trim();
+  if(!text)return;
+
+  input.value='';
+  input.style.height='auto';
+  btn.disabled=true;
+
+  // Hide suggestions after first use
+  document.getElementById('suggestions').style.display='none';
+
+  appendMsg('user',`<div class="bubble">${esc(text)}</div><div class="msg-time">${now()}</div>`);
+
+  const loader=appendMsg('bot',`
+    <div class="typing">
+      <div class="typing-dots"><span></span><span></span><span></span></div>
+      Crafting your miniature ASMR world…
+    </div>`);
+
+  try{
+    const res=await fetch('/api/chat',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({message:text}),
+    });
+    const data=await res.json();
+    loader.remove();
+
+    if(data.type==='refusal'){
+      appendMsg('bot',`<div class="bubble refusal">${esc(data.message)}</div><div class="msg-time">${now()}</div>`);
+
+    }else if(data.type==='demo'){
+      appendMsg('bot',`<div class="bubble demo">${esc(data.message)}</div><div class="msg-time">${now()}</div>`);
+
+    }else if(data.type==='video'){
+      appendMsg('bot',`
+        <div class="video-card">
+          <video src="${esc(data.video_url)}" controls autoplay loop muted playsinline></video>
+          <div class="video-meta"><strong>Prompt:</strong> ${esc(data.prompt)}</div>
+        </div>
+        <div class="msg-time">${now()}</div>`);
+
+    }else{
+      appendMsg('bot',`<div class="bubble refusal">⚠️ ${esc(data.error||'Something went wrong.')}</div><div class="msg-time">${now()}</div>`);
+    }
+  }catch{
+    loader.remove();
+    appendMsg('bot',`<div class="bubble refusal">⚠️ Network error — please try again.</div><div class="msg-time">${now()}</div>`);
+  }
+
+  btn.disabled=false;
+  input.focus();
+}
+</script>
+</body>
+</html>

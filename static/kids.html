@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>🌙 Dreamy ASMR — Your Cozy Sound Friend</title>
+<style>
+/* ═══════════════════════════════════════════
+   RESET & BASE
+═══════════════════════════════════════════ */
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --sky:#B8E6FF;--mint:#B8F5EC;--lav:#E2D4FF;--pink:#FFD6E8;
+  --peach:#FFE4CC;--yellow:#FFF3B0;--cream:#FFFBF5;--white:#FFFFFF;
+  --lav-dark:#9B7FD4;--teal:#5EC8C0;--blue:#5BAEE0;--rose:#E88FA8;
+  --gold:#F5C842;--text:#3D2C6B;--muted:#8B7BAE;
+  --card:rgba(255,255,255,0.72);--card2:rgba(255,255,255,0.55);
+  --shadow:0 8px 32px rgba(120,90,200,0.13);
+  --shadow2:0 4px 20px rgba(120,90,200,0.10);
+  --r:28px;--r2:20px;
+}
+html,body{height:100%;overflow:hidden;font-family:'Segoe UI',system-ui,sans-serif;color:var(--text)}
+
+/* ═══════════════════════════════════════════
+   DREAMY BACKGROUND
+═══════════════════════════════════════════ */
+.bg{
+  position:fixed;inset:0;z-index:0;
+  background:linear-gradient(160deg,#E8DDFF 0%,#C8E8FF 35%,#C8F5EC 65%,#FFE8F5 100%);
+  overflow:hidden;
+}
+/* Floating clouds */
+.cloud{position:absolute;border-radius:50px;opacity:0.55;animation:floatCloud linear infinite}
+.cloud::before,.cloud::after{content:'';position:absolute;background:inherit;border-radius:50%}
+.c1{width:120px;height:40px;background:#fff;top:8%;left:-140px;animation-duration:28s;animation-delay:0s}
+.c1::before{width:60px;height:60px;top:-30px;left:20px}
+.c1::after{width:45px;height:45px;top:-22px;left:55px}
+.c2{width:90px;height:30px;background:#F0E8FF;top:18%;left:-110px;animation-duration:36s;animation-delay:6s}
+.c2::before{width:50px;height:50px;top:-25px;left:12px}
+.c2::after{width:38px;height:38px;top:-18px;left:45px}
+.c3{width:150px;height:48px;background:#E8F8FF;top:60%;left:-170px;animation-duration:42s;animation-delay:14s}
+.c3::before{width:72px;height:72px;top:-36px;left:22px}
+.c3::after{width:55px;height:55px;top:-27px;left:68px}
+.c4{width:80px;height:26px;background:#FFF0F8;top:75%;left:-100px;animation-duration:32s;animation-delay:20s}
+.c4::before{width:44px;height:44px;top:-22px;left:10px}
+.c4::after{width:34px;height:34px;top:-17px;left:38px}
+@keyframes floatCloud{to{transform:translateX(calc(100vw + 200px))}}
+
+/* Stars */
+.star{position:absolute;animation:twinkle ease-in-out infinite}
+@keyframes twinkle{0%,100%{opacity:.2;transform:scale(0.7)}50%{opacity:1;transform:scale(1.1)}}
+
+/* Floating bubbles */
+.bubble{position:absolute;border-radius:50%;animation:riseBubble ease-in infinite}
+@keyframes riseBubble{0%{transform:translateY(0) scale(1);opacity:0.7}100%{transform:translateY(-110vh) scale(1.4);opacity:0}}
+
+/* Sparkles */
+.sparkle{position:absolute;animation:sparkleAnim ease-in-out infinite}
+@keyframes sparkleAnim{0%,100%{opacity:0;transform:scale(0) rotate(0deg)}50%{opacity:1;transform:scale(1) rotate(180deg)}}
+
+/* ═══════════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════════ */
+.app{position:relative;z-index:1;display:flex;height:100vh;overflow:hidden}
+
+/* ═══════════════════════════════════════════
+   SIDEBAR
+═══════════════════════════════════════════ */
+.sidebar{
+  width:88px;flex-shrink:0;
+  background:rgba(255,255,255,0.65);
+  backdrop-filter:blur(20px);
+  border-right:1.5px solid rgba(255,255,255,0.8);
+  display:flex;flex-direction:column;align-items:center;
+  padding:20px 0;gap:6px;
+  box-shadow:4px 0 24px rgba(155,127,212,0.10);
+}
+.sb-logo{
+  font-size:2rem;margin-bottom:14px;
+  animation:bounceLogo 2s ease-in-out infinite;
+}
+@keyframes bounceLogo{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.sb-btn{
+  width:60px;height:60px;border-radius:18px;border:none;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  background:transparent;transition:all .22s ease;font-size:.55rem;font-weight:700;
+  color:var(--muted);letter-spacing:.3px;text-transform:uppercase;
+}
+.sb-btn:hover,.sb-btn.active{
+  background:linear-gradient(135deg,var(--lav),var(--sky));
+  color:var(--lav-dark);transform:scale(1.08);
+  box-shadow:0 4px 16px rgba(155,127,212,0.25);
+}
+.sb-btn span.ico{font-size:1.5rem}
+.sb-spacer{flex:1}
+.sb-avatar{
+  width:48px;height:48px;border-radius:50%;
+  background:linear-gradient(135deg,#FFD6E8,#E2D4FF);
+  border:3px solid #fff;display:flex;align-items:center;justify-content:center;
+  font-size:1.4rem;box-shadow:var(--shadow2);cursor:pointer;
+  transition:transform .2s;
+}
+.sb-avatar:hover{transform:scale(1.1)}
+
+/* ═══════════════════════════════════════════
+   MAIN SCROLL AREA
+═══════════════════════════════════════════ */
+.main{flex:1;overflow-y:auto;padding:20px 24px 40px;display:flex;flex-direction:column;gap:20px;
+  scrollbar-width:thin;scrollbar-color:rgba(155,127,212,0.3) transparent}
+
+/* ── TOP BAR ── */
+.topbar{display:flex;align-items:center;gap:14px;flex-shrink:0}
+.greeting h2{font-size:1.25rem;font-weight:800;color:var(--text)}
+.greeting p{font-size:.8rem;color:var(--muted);margin-top:2px}
+.topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.search-box{
+  display:flex;align-items:center;gap:8px;
+  background:var(--card);backdrop-filter:blur(12px);
+  border:1.5px solid rgba(255,255,255,0.9);border-radius:40px;
+  padding:8px 16px;box-shadow:var(--shadow2);
+}
+.search-box input{border:none;outline:none;background:transparent;font-size:.85rem;color:var(--text);width:150px}
+.search-box input::placeholder{color:var(--muted)}
+.notif-btn{
+  width:40px;height:40px;border-radius:14px;border:none;cursor:pointer;
+  background:var(--card);backdrop-filter:blur(12px);
+  border:1.5px solid rgba(255,255,255,.9);font-size:1.1rem;
+  box-shadow:var(--shadow2);transition:transform .2s;
+}
+.notif-btn:hover{transform:scale(1.1)}
+
+/* ═══════════════════════════════════════════
+   HERO — ROBOT + PLAYER
+═══════════════════════════════════════════ */
+.hero{display:flex;gap:18px;align-items:stretch}
+
+/* Robot card */
+.robot-card{
+  background:linear-gradient(135deg,rgba(226,212,255,0.8),rgba(184,230,255,0.8));
+  backdrop-filter:blur(20px);border-radius:var(--r);
+  border:2px solid rgba(255,255,255,0.9);box-shadow:var(--shadow);
+  padding:24px 20px;display:flex;flex-direction:column;align-items:center;
+  flex:0 0 220px;position:relative;overflow:hidden;
+}
+.robot-card::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(circle at 50% 20%,rgba(255,255,255,0.5),transparent 65%);
+}
+.robot-name{font-size:.75rem;font-weight:800;letter-spacing:1px;text-transform:uppercase;
+  color:var(--lav-dark);margin-bottom:6px;position:relative}
+.robot-wrap{position:relative;animation:robotFloat 3.5s ease-in-out infinite}
+@keyframes robotFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.robot-glow{
+  position:absolute;bottom:-10px;left:50%;transform:translateX(-50%);
+  width:100px;height:18px;border-radius:50%;
+  background:rgba(155,127,212,0.3);filter:blur(8px);
+  animation:glowPulse 3.5s ease-in-out infinite;
+}
+@keyframes glowPulse{0%,100%{opacity:.4;transform:translateX(-50%) scaleX(.8)}50%{opacity:.8;transform:translateX(-50%) scaleX(1.1)}}
+.robot-mood{
+  margin-top:14px;font-size:.8rem;font-weight:700;color:var(--lav-dark);
+  background:rgba(255,255,255,.6);border-radius:40px;padding:5px 14px;
+  position:relative;
+}
+.robot-hearts{position:absolute;top:0;right:-8px;animation:heartPop 2s ease-in-out infinite}
+@keyframes heartPop{0%,100%{transform:scale(1) translateY(0);opacity:1}50%{transform:scale(1.4) translateY(-4px);opacity:.7}}
+
+/* Now Playing card */
+.player-card{
+  flex:1;background:linear-gradient(135deg,rgba(255,214,232,0.75),rgba(255,228,204,0.75));
+  backdrop-filter:blur(20px);border-radius:var(--r);
+  border:2px solid rgba(255,255,255,0.9);box-shadow:var(--shadow);
+  padding:22px 24px;display:flex;flex-direction:column;gap:14px;overflow:hidden;position:relative;
+}
+.player-card::before{
+  content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;
+  border-radius:50%;background:rgba(255,255,255,0.2);
+}
+.now-label{font-size:.7rem;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:var(--rose)}
+.now-title{font-size:1.3rem;font-weight:900;color:var(--text)}
+.now-sub{font-size:.78rem;color:var(--muted);margin-top:-8px}
+
+/* Waveform */
+.waveform{display:flex;align-items:center;gap:5px;height:44px;padding:4px 0}
+.wave-item{
+  border-radius:40px;animation:waveAnim ease-in-out infinite;
+  background:linear-gradient(180deg,var(--rose),var(--peach));
+}
+@keyframes waveAnim{0%,100%{transform:scaleY(.3)}50%{transform:scaleY(1)}}
+
+/* Progress */
+.prog-row{display:flex;align-items:center;gap:12px}
+.prog-bar{flex:1;height:10px;border-radius:40px;background:rgba(255,255,255,0.6);overflow:hidden}
+.prog-fill{height:100%;border-radius:40px;background:linear-gradient(90deg,var(--rose),var(--gold));
+  width:38%;transition:width .3s}
+.prog-times{display:flex;justify-content:space-between;font-size:.7rem;color:var(--muted);font-weight:600}
+
+/* Controls */
+.controls{display:flex;align-items:center;justify-content:center;gap:14px}
+.ctrl-btn{
+  border:none;cursor:pointer;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;transition:all .2s;font-size:1.1rem;
+  background:rgba(255,255,255,0.65);backdrop-filter:blur(8px);
+  box-shadow:0 3px 12px rgba(232,143,168,0.2);
+}
+.ctrl-btn.sm{width:40px;height:40px}
+.ctrl-btn.md{width:52px;height:52px;font-size:1.3rem}
+.ctrl-btn.lg{
+  width:68px;height:68px;font-size:1.8rem;
+  background:linear-gradient(135deg,var(--rose),#FFB8D4);
+  box-shadow:0 6px 24px rgba(232,143,168,0.45);color:#fff;
+}
+.ctrl-btn:hover{transform:scale(1.12)}
+.ctrl-btn.lg:hover{transform:scale(1.08)}
+
+/* Volume */
+.vol-row{display:flex;align-items:center;gap:10px;font-size:.85rem}
+.vol-slider{
+  flex:1;height:6px;border-radius:40px;accent-color:var(--rose);cursor:pointer;
+  background:rgba(255,255,255,.6);
+}
+input[type=range]{-webkit-appearance:none;appearance:none;outline:none;border:none}
+input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:40px;background:rgba(255,255,255,.6)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;
+  background:linear-gradient(135deg,var(--rose),#FFB8D4);margin-top:-6px;box-shadow:0 2px 8px rgba(232,143,168,.4)}
+
+/* Timer chips */
+.timer-row{display:flex;gap:8px}
+.timer-chip{
+  padding:5px 13px;border-radius:40px;border:none;cursor:pointer;font-size:.72rem;font-weight:700;
+  background:rgba(255,255,255,.6);color:var(--muted);transition:all .2s;
+  border:1.5px solid rgba(255,255,255,.8);
+}
+.timer-chip:hover,.timer-chip.active{background:linear-gradient(135deg,var(--rose),#FFB8D4);color:#fff;
+  box-shadow:0 3px 10px rgba(232,143,168,.3);}
+
+/* ═══════════════════════════════════════════
+   MOOD SECTION
+═══════════════════════════════════════════ */
+.section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.section-title{font-size:1rem;font-weight:800;color:var(--text)}
+.see-all{font-size:.75rem;font-weight:700;color:var(--lav-dark);cursor:pointer;
+  background:none;border:none;transition:opacity .2s}
+.see-all:hover{opacity:.7}
+
+.mood-row{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;
+  scrollbar-width:none}
+.mood-row::-webkit-scrollbar{display:none}
+.mood-card{
+  flex:0 0 90px;padding:12px 8px;border-radius:var(--r2);border:2px solid rgba(255,255,255,.85);
+  background:var(--card);backdrop-filter:blur(12px);box-shadow:var(--shadow2);
+  display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;
+  transition:all .22s;text-align:center;
+}
+.mood-card:hover,.mood-card.active{transform:translateY(-5px) scale(1.05);box-shadow:var(--shadow)}
+.mood-card.active{border-color:rgba(155,127,212,.5)}
+.mood-ico{font-size:1.8rem;animation:moodBounce 2s ease-in-out infinite}
+@keyframes moodBounce{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+.mood-label{font-size:.65rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+
+/* ═══════════════════════════════════════════
+   SOUND CARDS GRID
+═══════════════════════════════════════════ */
+.sound-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+.sound-card{
+  border-radius:var(--r2);border:2px solid rgba(255,255,255,.85);
+  backdrop-filter:blur(14px);box-shadow:var(--shadow2);
+  padding:16px 12px;display:flex;flex-direction:column;align-items:center;
+  gap:8px;cursor:pointer;transition:all .24s;text-align:center;position:relative;overflow:hidden;
+}
+.sound-card::after{
+  content:'';position:absolute;inset:0;border-radius:inherit;
+  background:rgba(255,255,255,0);transition:background .2s;
+}
+.sound-card:hover{transform:translateY(-6px);box-shadow:var(--shadow)}
+.sound-card:hover::after{background:rgba(255,255,255,0.15)}
+.sound-card.playing{border-color:rgba(155,127,212,.6)}
+.sound-ico{
+  width:52px;height:52px;border-radius:16px;display:flex;align-items:center;
+  justify-content:center;font-size:1.6rem;box-shadow:0 4px 14px rgba(0,0,0,.08);
+  transition:transform .2s;
+}
+.sound-card:hover .sound-ico{transform:scale(1.15) rotate(-5deg)}
+.sound-name{font-size:.7rem;font-weight:800;color:var(--text);letter-spacing:.3px}
+.sound-fav{
+  position:absolute;top:8px;right:10px;font-size:.9rem;cursor:pointer;
+  transition:transform .2s;opacity:.5;
+}
+.sound-fav:hover,.sound-fav.active{transform:scale(1.3);opacity:1}
+.sound-badge{
+  position:absolute;top:8px;left:10px;font-size:.55rem;font-weight:800;
+  background:linear-gradient(135deg,var(--gold),#FFD870);color:#7A5A00;
+  padding:2px 7px;border-radius:40px;box-shadow:0 2px 6px rgba(245,200,66,.3);
+}
+
+/* ═══════════════════════════════════════════
+   BOTTOM ROW — ACHIEVEMENTS + STREAK + RECS
+═══════════════════════════════════════════ */
+.bottom-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+
+/* Achievements */
+.achieve-card{
+  background:linear-gradient(135deg,rgba(255,243,176,0.8),rgba(255,228,204,0.8));
+  backdrop-filter:blur(16px);border-radius:var(--r);
+  border:2px solid rgba(255,255,255,.9);box-shadow:var(--shadow);
+  padding:18px 16px;
+}
+.badge-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.badge{
+  display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 6px;
+  border-radius:16px;background:rgba(255,255,255,.6);border:1.5px solid rgba(255,255,255,.9);
+  cursor:pointer;transition:transform .2s;
+}
+.badge:hover{transform:scale(1.1)}
+.badge-ico{font-size:1.5rem}
+.badge-name{font-size:.55rem;font-weight:800;color:var(--muted);text-align:center;text-transform:uppercase}
+.badge.locked{opacity:.4;filter:grayscale(.8)}
+
+/* Streak */
+.streak-card{
+  background:linear-gradient(135deg,rgba(184,245,236,0.8),rgba(184,230,255,0.8));
+  backdrop-filter:blur(16px);border-radius:var(--r);
+  border:2px solid rgba(255,255,255,.9);box-shadow:var(--shadow);
+  padding:18px 16px;display:flex;flex-direction:column;gap:10px;
+}
+.streak-big{font-size:3rem;font-weight:900;color:var(--teal);line-height:1;
+  display:flex;align-items:baseline;gap:6px}
+.streak-big small{font-size:1rem;font-weight:700;color:var(--muted)}
+.streak-days{display:flex;gap:6px;margin-top:4px}
+.streak-day{
+  flex:1;aspect-ratio:1;border-radius:10px;display:flex;align-items:center;
+  justify-content:center;font-size:.6rem;font-weight:800;color:var(--muted);
+  background:rgba(255,255,255,.5);transition:all .2s;
+}
+.streak-day.done{background:linear-gradient(135deg,var(--teal),var(--blue));color:#fff;
+  box-shadow:0 3px 10px rgba(94,200,192,.3)}
+.streak-day.today{background:linear-gradient(135deg,var(--gold),#FFD870);color:#7A5A00;
+  box-shadow:0 3px 10px rgba(245,200,66,.3)}
+.daily-activities{display:flex;flex-direction:column;gap:6px;margin-top:4px}
+.activity-item{
+  display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:14px;
+  background:rgba(255,255,255,.55);font-size:.72rem;font-weight:700;color:var(--text);
+  cursor:pointer;transition:background .2s;border:1.5px solid rgba(255,255,255,.8);
+}
+.activity-item:hover{background:rgba(255,255,255,.8)}
+.activity-item .a-ico{font-size:1rem;flex-shrink:0}
+.activity-item .a-check{margin-left:auto;font-size:.9rem}
+
+/* Recommendations */
+.rec-card{
+  background:linear-gradient(135deg,rgba(226,212,255,0.75),rgba(255,214,232,0.75));
+  backdrop-filter:blur(16px);border-radius:var(--r);
+  border:2px solid rgba(255,255,255,.9);box-shadow:var(--shadow);
+  padding:18px 16px;display:flex;flex-direction:column;gap:10px;
+}
+.rec-list{display:flex;flex-direction:column;gap:8px;margin-top:4px}
+.rec-item{
+  display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:16px;
+  background:rgba(255,255,255,.55);cursor:pointer;transition:all .2s;
+  border:1.5px solid rgba(255,255,255,.8);
+}
+.rec-item:hover{background:rgba(255,255,255,.8);transform:translateX(4px)}
+.rec-ico{
+  width:36px;height:36px;border-radius:12px;display:flex;align-items:center;
+  justify-content:center;font-size:1.1rem;flex-shrink:0;
+}
+.rec-info{flex:1}
+.rec-name{font-size:.75rem;font-weight:800;color:var(--text)}
+.rec-desc{font-size:.62rem;color:var(--muted);margin-top:1px}
+.rec-play{font-size:1rem;color:var(--lav-dark);transition:transform .2s}
+.rec-item:hover .rec-play{transform:scale(1.3)}
+
+/* ═══════════════════════════════════════════
+   ROBOT SVG STYLES
+═══════════════════════════════════════════ */
+#robotSvg{width:130px;height:160px;cursor:pointer;position:relative;z-index:1}
+.eye-blink{animation:blinkAnim 4s ease-in-out infinite}
+@keyframes blinkAnim{
+  0%,88%,100%{transform:scaleY(1)}
+  91%,97%{transform:scaleY(0.05)}
+}
+.antenna-ball{animation:antennaWiggle 2s ease-in-out infinite}
+@keyframes antennaWiggle{0%,100%{transform:rotate(-5deg)}50%{transform:rotate(5deg)}}
+.robot-cheek{animation:cheekPulse 3s ease-in-out infinite}
+@keyframes cheekPulse{0%,100%{opacity:.5}50%{opacity:.85}}
+.robot-ear-l,.robot-ear-r{animation:earWiggle 3s ease-in-out infinite}
+@keyframes earWiggle{0%,100%{transform:rotate(0deg)}50%{transform:rotate(8deg)}}
+.robot-ear-r{animation-delay:.5s}
+.happy-star{animation:starPop 1.5s ease-in-out infinite}
+@keyframes starPop{0%,100%{opacity:0;transform:scale(0) translateY(0)}
+  30%{opacity:1;transform:scale(1) translateY(-6px)}
+  70%{opacity:.8;transform:scale(.9) translateY(-10px)}}
+
+/* ═══════════════════════════════════════════
+   SCROLLBAR
+═══════════════════════════════════════════ */
+.main::-webkit-scrollbar{width:5px}
+.main::-webkit-scrollbar-thumb{background:rgba(155,127,212,0.3);border-radius:40px}
+
+/* ═══════════════════════════════════════════
+   MICRO-INTERACTIONS
+═══════════════════════════════════════════ */
+@keyframes popIn{0%{transform:scale(.6);opacity:0}80%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+.pop{animation:popIn .35s cubic-bezier(.34,1.56,.64,1) forwards}
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════ */
+@media(max-width:1100px){.sound-grid{grid-template-columns:repeat(3,1fr)}.bottom-row{grid-template-columns:1fr 1fr}}
+@media(max-width:800px){.hero{flex-direction:column}.robot-card{flex:none;flex-direction:row;padding:16px}.sound-grid{grid-template-columns:repeat(2,1fr)}.bottom-row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<!-- ══ BACKGROUND ══ -->
+<div class="bg" id="bgLayer">
+  <div class="cloud c1"></div>
+  <div class="cloud c2"></div>
+  <div class="cloud c3"></div>
+  <div class="cloud c4"></div>
+</div>
+
+<!-- ══ APP ══ -->
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-logo">🌙</div>
+    <button class="sb-btn active" onclick="setPage(this)">
+      <span class="ico">🏠</span>Home
+    </button>
+    <button class="sb-btn" onclick="setPage(this)">
+      <span class="ico">🎵</span>Sounds
+    </button>
+    <button class="sb-btn" onclick="setPage(this)">
+      <span class="ico">📖</span>Stories
+    </button>
+    <button class="sb-btn" onclick="setPage(this)">
+      <span class="ico">💖</span>Favs
+    </button>
+    <button class="sb-btn" onclick="setPage(this)">
+      <span class="ico">🏆</span>Goals
+    </button>
+    <button class="sb-btn" onclick="setPage(this)">
+      <span class="ico">⚙️</span>Settings
+    </button>
+    <div class="sb-spacer"></div>
+    <div class="sb-avatar">🐱</div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- TOP BAR -->
+    <div class="topbar">
+      <div class="greeting">
+        <h2>Good Evening, Luna! 🌟</h2>
+        <p>Ready for your cozy ASMR adventure?</p>
+      </div>
+      <div class="topbar-right">
+        <div class="search-box">
+          <span>🔍</span>
+          <input type="text" placeholder="Search sounds…"/>
+        </div>
+        <button class="notif-btn">🔔</button>
+      </div>
+    </div>
+
+    <!-- HERO: ROBOT + PLAYER -->
+    <div class="hero">
+
+      <!-- Robot -->
+      <div class="robot-card">
+        <div class="robot-name">✨ Dreamy Bot ✨</div>
+        <div class="robot-wrap" onclick="robotReact()">
+          <!-- ROBOT SVG -->
+          <svg id="robotSvg" viewBox="0 0 130 160" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="bodyGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#C9B8FF"/>
+                <stop offset="100%" stop-color="#87CEEB"/>
+              </linearGradient>
+              <linearGradient id="faceGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#EEE8FF"/>
+                <stop offset="100%" stop-color="#D8F0FF"/>
+              </linearGradient>
+              <linearGradient id="eyeGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#7B5ECC"/>
+                <stop offset="100%" stop-color="#5BAEE0"/>
+              </linearGradient>
+              <filter id="glow">
+                <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
+                <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+            </defs>
+
+            <!-- Antenna -->
+            <g class="antenna-ball" transform-origin="65 48">
+              <line x1="65" y1="26" x2="65" y2="48" stroke="#B0A0E8" stroke-width="3" stroke-linecap="round"/>
+              <circle cx="65" cy="22" r="7" fill="url(#eyeGrad)" filter="url(#glow)"/>
+              <circle cx="63" cy="20" r="2" fill="rgba(255,255,255,0.7)"/>
+            </g>
+
+            <!-- Ears -->
+            <g class="robot-ear-l" transform-origin="14 90">
+              <rect x="5" y="78" width="18" height="24" rx="9" fill="url(#bodyGrad)" opacity=".9"/>
+              <rect x="9" y="84" width="10" height="12" rx="5" fill="rgba(255,255,255,0.35)"/>
+            </g>
+            <g class="robot-ear-r" transform-origin="116 90">
+              <rect x="107" y="78" width="18" height="24" rx="9" fill="url(#bodyGrad)" opacity=".9"/>
+              <rect x="111" y="84" width="10" height="12" rx="5" fill="rgba(255,255,255,0.35)"/>
+            </g>
+
+            <!-- Body -->
+            <rect x="20" y="48" width="90" height="105" rx="28" fill="url(#bodyGrad)" filter="url(#glow)"/>
+            <rect x="20" y="48" width="90" height="105" rx="28" fill="rgba(255,255,255,0.18)"/>
+            <!-- Body shine -->
+            <ellipse cx="50" cy="68" rx="18" ry="10" fill="rgba(255,255,255,0.3)"/>
+
+            <!-- Face plate -->
+            <rect x="28" y="56" width="74" height="70" rx="22" fill="url(#faceGrad)"/>
+            <rect x="28" y="56" width="74" height="70" rx="22" fill="rgba(255,255,255,0.25)"/>
+
+            <!-- Eyes -->
+            <g class="eye-blink" transform-origin="47 85">
+              <ellipse cx="47" cy="85" rx="11" ry="11" fill="url(#eyeGrad)"/>
+              <circle cx="47" cy="85" r="11" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
+              <circle cx="51" cy="81" r="4" fill="rgba(255,255,255,0.85)"/>
+              <circle cx="44" cy="88" r="2" fill="rgba(255,255,255,0.5)"/>
+              <!-- Lashes -->
+              <line x1="40" y1="76" x2="38" y2="73" stroke="#9B7FD4" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="47" y1="74" x2="47" y2="71" stroke="#9B7FD4" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="54" y1="76" x2="56" y2="73" stroke="#9B7FD4" stroke-width="1.5" stroke-linecap="round"/>
+            </g>
+            <g class="eye-blink" transform-origin="83 85">
+              <ellipse cx="83" cy="85" rx="11" ry="11" fill="url(#eyeGrad)"/>
+              <circle cx="83" cy="85" r="11" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
+              <circle cx="87" cy="81" r="4" fill="rgba(255,255,255,0.85)"/>
+              <circle cx="80" cy="88" r="2" fill="rgba(255,255,255,0.5)"/>
+              <line x1="76" y1="76" x2="74" y2="73" stroke="#9B7FD4" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="83" y1="74" x2="83" y2="71" stroke="#9B7FD4" stroke-width="1.5" stroke-linecap="round"/>
+              <line x1="90" y1="76" x2="92" y2="73" stroke="#9B7FD4" stroke-width="1.5" stroke-linecap="round"/>
+            </g>
+
+            <!-- Blush cheeks -->
+            <ellipse class="robot-cheek" cx="35" cy="97" rx="8" ry="5" fill="#FFB8D4" opacity=".6"/>
+            <ellipse class="robot-cheek" cx="95" cy="97" rx="8" ry="5" fill="#FFB8D4" opacity=".6"/>
+
+            <!-- Smile -->
+            <path d="M 48 106 Q 65 118 82 106" stroke="#9B7FD4" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M 48 106 Q 65 118 82 106" stroke="rgba(255,255,255,0.6)" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+
+            <!-- Belly button / speaker -->
+            <rect x="48" y="128" width="34" height="16" rx="8" fill="rgba(255,255,255,0.45)" stroke="rgba(155,127,212,.4)" stroke-width="1.5"/>
+            <circle cx="55" cy="136" r="3" fill="rgba(155,127,212,.5)"/>
+            <circle cx="65" cy="136" r="3" fill="rgba(155,127,212,.5)"/>
+            <circle cx="75" cy="136" r="3" fill="rgba(155,127,212,.5)"/>
+
+            <!-- Happy stars (show on click) -->
+            <text class="happy-star" id="hs1" x="10" y="55" font-size="14" opacity="0">⭐</text>
+            <text class="happy-star" id="hs2" x="95" y="50" font-size="12" opacity="0" style="animation-delay:.3s">💫</text>
+            <text class="happy-star" id="hs3" x="52" y="30" font-size="10" opacity="0" style="animation-delay:.6s">✨</text>
+          </svg>
+          <div class="robot-glow"></div>
+        </div>
+        <div class="robot-mood">💤 Sleepy Mode <span class="robot-hearts">💜</span></div>
+      </div>
+
+      <!-- Player -->
+      <div class="player-card">
+        <div>
+          <div class="now-label">▶ Now Playing</div>
+          <div class="now-title">🌧️ Gentle Rain Drops</div>
+          <div class="now-sub">Rain Sounds · Relaxing · 8 min loop</div>
+        </div>
+
+        <!-- Waveform as animated bars -->
+        <div class="waveform" id="waveform"></div>
+
+        <div>
+          <div class="prog-row">
+            <span style="font-size:.7rem;font-weight:700;color:var(--muted)">2:14</span>
+            <div class="prog-bar"><div class="prog-fill" id="progFill"></div></div>
+            <span style="font-size:.7rem;font-weight:700;color:var(--muted)">8:00</span>
+          </div>
+        </div>
+
+        <div class="controls">
+          <button class="ctrl-btn sm" title="Shuffle">🔀</button>
+          <button class="ctrl-btn md" onclick="prevSound()">⏮</button>
+          <button class="ctrl-btn lg" id="playBtn" onclick="togglePlay()">▶️</button>
+          <button class="ctrl-btn md" onclick="nextSound()">⏭</button>
+          <button class="ctrl-btn sm" title="Repeat">🔁</button>
+        </div>
+
+        <div class="vol-row">
+          <span>🔈</span>
+          <input type="range" class="vol-slider" min="0" max="100" value="70" id="volSlider"/>
+          <span>🔊</span>
+          <span style="font-size:.75rem;font-weight:700;color:var(--muted);margin-left:4px" id="volVal">70%</span>
+        </div>
+
+        <div>
+          <div style="font-size:.7rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">⏱ Sleep Timer</div>
+          <div class="timer-row">
+            <button class="timer-chip" onclick="setTimer(this,15)">15 min</button>
+            <button class="timer-chip active" onclick="setTimer(this,30)">30 min</button>
+            <button class="timer-chip" onclick="setTimer(this,60)">60 min</button>
+            <button class="timer-chip" onclick="setTimer(this,0)">Off</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MOOD -->
+    <div>
+      <div class="section-hdr">
+        <div class="section-title">How are you feeling? 🌈</div>
+      </div>
+      <div class="mood-row">
+        <div class="mood-card active" onclick="setMood(this)">
+          <div class="mood-ico">😴</div>
+          <div class="mood-label">Sleepy</div>
+        </div>
+        <div class="mood-card" onclick="setMood(this)">
+          <div class="mood-ico">😊</div>
+          <div class="mood-label">Happy</div>
+        </div>
+        <div class="mood-card" onclick="setMood(this)">
+          <div class="mood-ico">😌</div>
+          <div class="mood-label">Calm</div>
+        </div>
+        <div class="mood-card" onclick="setMood(this)">
+          <div class="mood-ico">🥺</div>
+          <div class="mood-label">Anxious</div>
+        </div>
+        <div class="mood-card" onclick="setMood(this)">
+          <div class="mood-ico">🤩</div>
+          <div class="mood-label">Excited</div>
+        </div>
+        <div class="mood-card" onclick="setMood(this)">
+          <div class="mood-ico">😢</div>
+          <div class="mood-label">Sad</div>
+        </div>
+        <div class="mood-card" onclick="setMood(this)">
+          <div class="mood-ico">😤</div>
+          <div class="mood-label">Stressed</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SOUND CARDS -->
+    <div>
+      <div class="section-hdr">
+        <div class="section-title">🎧 Your Magical Sounds</div>
+        <button class="see-all">See all →</button>
+      </div>
+      <div class="sound-grid" id="soundGrid"></div>
+    </div>
+
+    <!-- BOTTOM ROW -->
+    <div class="bottom-row">
+
+      <!-- Achievements -->
+      <div class="achieve-card">
+        <div class="section-title">🏆 My Badges</div>
+        <div class="badge-grid" id="badgeGrid"></div>
+      </div>
+
+      <!-- Streak -->
+      <div class="streak-card">
+        <div class="section-title">🔥 Bedtime Streak</div>
+        <div class="streak-big">7 <small>days!</small></div>
+        <div class="streak-days" id="streakDays"></div>
+        <div style="font-size:.75rem;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-top:8px">Today's Activities</div>
+        <div class="daily-activities" id="activities"></div>
+      </div>
+
+      <!-- Recommendations -->
+      <div class="rec-card">
+        <div class="section-title">💡 Just For You</div>
+        <div class="rec-list" id="recList"></div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+/* ══════════════════════════════════════
+   BACKGROUND — STARS, BUBBLES, SPARKLES
+══════════════════════════════════════ */
+const bg = document.getElementById('bgLayer');
+
+// Stars
+const starEmojis = ['⭐','✨','💫','🌟','⚡'];
+for(let i=0;i<28;i++){
+  const s=document.createElement('div');
+  s.className='star';
+  s.textContent=starEmojis[Math.floor(Math.random()*starEmojis.length)];
+  s.style.cssText=`left:${Math.random()*100}%;top:${Math.random()*100}%;
+    font-size:${.7+Math.random()*1.1}rem;
+    animation-duration:${2+Math.random()*3}s;
+    animation-delay:${Math.random()*4}s;`;
+  bg.appendChild(s);
+}
+
+// Bubbles
+const bubbleColors=['rgba(184,230,255,.5)','rgba(226,212,255,.5)','rgba(255,214,232,.5)','rgba(184,245,236,.5)'];
+for(let i=0;i<18;i++){
+  const b=document.createElement('div');
+  b.className='bubble';
+  const sz=12+Math.random()*24;
+  b.style.cssText=`left:${Math.random()*100}%;bottom:${-sz}px;
+    width:${sz}px;height:${sz}px;
+    background:${bubbleColors[Math.floor(Math.random()*bubbleColors.length)]};
+    border:1.5px solid rgba(255,255,255,.5);
+    animation-duration:${6+Math.random()*10}s;
+    animation-delay:${Math.random()*8}s;`;
+  bg.appendChild(b);
+}
+
+// Sparkles
+const sparkleList=['💎','🌸','🦋','🌺','🍀','🎀'];
+for(let i=0;i<12;i++){
+  const sp=document.createElement('div');
+  sp.className='sparkle';
+  sp.textContent=sparkleList[Math.floor(Math.random()*sparkleList.length)];
+  sp.style.cssText=`left:${Math.random()*100}%;top:${Math.random()*100}%;
+    font-size:${.8+Math.random()*.8}rem;
+    animation-duration:${3+Math.random()*4}s;
+    animation-delay:${Math.random()*5}s;`;
+  bg.appendChild(sp);
+}
+
+/* ══════════════════════════════════════
+   WAVEFORM
+══════════════════════════════════════ */
+const wf = document.getElementById('waveform');
+const waveShapes = ['💜','💙','🩷','⭐','💚'];
+for(let i=0;i<32;i++){
+  const bar=document.createElement('div');
+  bar.className='wave-item';
+  const h=8+Math.random()*28;
+  bar.style.cssText=`width:5px;height:${h}px;flex-shrink:0;
+    animation-duration:${.5+Math.random()*.8}s;
+    animation-delay:${i*.05}s;`;
+  wf.appendChild(bar);
+}
+
+/* ══════════════════════════════════════
+   SOUND CARDS DATA
+══════════════════════════════════════ */
+const sounds=[
+  {ico:'🌧️',name:'Rain Drops',  bg:'linear-gradient(135deg,#B8E6FF,#D0F0FF)',badge:'🆕',fav:true},
+  {ico:'🌊',name:'Ocean Waves',  bg:'linear-gradient(135deg,#87CEEB,#B8F5EC)',badge:'',fav:false},
+  {ico:'🐱',name:'Cat Purring',  bg:'linear-gradient(135deg,#FFD6E8,#FFE4CC)',badge:'❤️',fav:true},
+  {ico:'🧚',name:'Fairy Chimes', bg:'linear-gradient(135deg,#E2D4FF,#FFD6E8)',badge:'🌟',fav:false},
+  {ico:'🍃',name:'Gentle Wind',  bg:'linear-gradient(135deg,#B8F5EC,#FFF3B0)',badge:'',fav:false},
+  {ico:'📚',name:'Story Time',   bg:'linear-gradient(135deg,#FFE4CC,#FFD6E8)',badge:'🔥',fav:true},
+  {ico:'🤫',name:'Whisper Mode', bg:'linear-gradient(135deg,#E2D4FF,#B8E6FF)',badge:'',fav:false},
+  {ico:'🎵',name:'Sleep Music',  bg:'linear-gradient(135deg,#FFF3B0,#FFE4CC)',badge:'🏆',fav:true},
+  {ico:'🌲',name:'Forest Sounds',bg:'linear-gradient(135deg,#B8F5EC,#B8E6FF)',badge:'',fav:false},
+  {ico:'🎶',name:'Lullabies',    bg:'linear-gradient(135deg,#FFD6E8,#E2D4FF)',badge:'💎',fav:true},
+];
+let currentSound=0,isPlaying=false;
+
+const grid=document.getElementById('soundGrid');
+sounds.forEach((s,i)=>{
+  const c=document.createElement('div');
+  c.className='sound-card'+(i===0?' playing':'');
+  c.style.background=s.bg;
+  c.innerHTML=`
+    ${s.badge?`<div class="sound-badge">${s.badge}</div>`:''}
+    <div class="sound-fav${s.fav?' active':''}" onclick="toggleFav(event,this)">
+      ${s.fav?'💖':'🤍'}
+    </div>
+    <div class="sound-ico" style="background:rgba(255,255,255,0.6)">${s.ico}</div>
+    <div class="sound-name">${s.name}</div>`;
+  c.onclick=()=>selectSound(i,c);
+  grid.appendChild(c);
+});
+
+function selectSound(idx,card){
+  document.querySelectorAll('.sound-card').forEach(c=>c.classList.remove('playing'));
+  card.classList.add('playing');
+  card.classList.add('pop');
+  setTimeout(()=>card.classList.remove('pop'),400);
+  currentSound=idx;
+  document.querySelector('.now-title').textContent=sounds[idx].ico+' '+sounds[idx].name;
+  isPlaying=true;
+  document.getElementById('playBtn').textContent='⏸️';
+  robotReact();
+}
+
+function toggleFav(e,el){
+  e.stopPropagation();
+  el.classList.toggle('active');
+  el.textContent=el.classList.contains('active')?'💖':'🤍';
+}
+
+/* ══════════════════════════════════════
+   PLAYER CONTROLS
+══════════════════════════════════════ */
+function togglePlay(){
+  isPlaying=!isPlaying;
+  document.getElementById('playBtn').textContent=isPlaying?'⏸️':'▶️';
+  if(isPlaying)robotReact();
+}
+function prevSound(){
+  const cards=document.querySelectorAll('.sound-card');
+  currentSound=(currentSound-1+sounds.length)%sounds.length;
+  selectSound(currentSound,cards[currentSound]);
+}
+function nextSound(){
+  const cards=document.querySelectorAll('.sound-card');
+  currentSound=(currentSound+1)%sounds.length;
+  selectSound(currentSound,cards[currentSound]);
+}
+
+// Volume
+document.getElementById('volSlider').addEventListener('input',function(){
+  document.getElementById('volVal').textContent=this.value+'%';
+});
+
+// Timer
+function setTimer(btn,mins){
+  document.querySelectorAll('.timer-chip').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// Progress bar sim
+let prog=38;
+setInterval(()=>{
+  if(isPlaying){prog=Math.min(100,prog+.02)}
+  document.getElementById('progFill').style.width=prog+'%';
+  const total=480,elapsed=Math.round(prog/100*total);
+  const m=Math.floor(elapsed/60),s=elapsed%60;
+  document.querySelector('.prog-times:last-child') // not used — rely on direct DOM
+},300);
+
+/* ══════════════════════════════════════
+   ROBOT REACTION
+══════════════════════════════════════ */
+function robotReact(){
+  const svg=document.getElementById('robotSvg');
+  svg.style.filter='drop-shadow(0 0 16px rgba(155,127,212,.7))';
+  setTimeout(()=>svg.style.filter='',800);
+}
+
+/* ══════════════════════════════════════
+   MOOD
+══════════════════════════════════════ */
+function setMood(card){
+  document.querySelectorAll('.mood-card').forEach(c=>c.classList.remove('active'));
+  card.classList.add('active');
+  card.classList.add('pop');
+  setTimeout(()=>card.classList.remove('pop'),400);
+  const moods={
+    '😴':'💤 Sleepy Mode','😊':'😊 Happy Mode','😌':'😌 Calm Mode',
+    '🥺':'🤗 Cozy Mode','🤩':'🌟 Energetic Mode','😢':'💙 Comfort Mode','😤':'🧘 Zen Mode'
+  };
+  const ico=card.querySelector('.mood-ico').textContent;
+  document.querySelector('.robot-mood').innerHTML=(moods[ico]||'✨ Dreamy Mode')+' <span class="robot-hearts">💜</span>';
+}
+
+/* ══════════════════════════════════════
+   BADGES
+══════════════════════════════════════ */
+const badges=[
+  {ico:'🌙',name:'Night Owl',locked:false},
+  {ico:'⭐',name:'Star Gazer',locked:false},
+  {ico:'🎵',name:'Sound Star',locked:false},
+  {ico:'💤',name:'Sleep Hero',locked:false},
+  {ico:'🦋',name:'Dreamer',locked:false},
+  {ico:'🔥',name:'7 Day',locked:false},
+  {ico:'🏅',name:'Explorer',locked:true},
+  {ico:'💎',name:'Diamond',locked:true},
+  {ico:'🦄',name:'Unicorn',locked:true},
+];
+const bg2=document.getElementById('badgeGrid');
+badges.forEach(b=>{
+  const d=document.createElement('div');
+  d.className='badge'+(b.locked?' locked':'');
+  d.innerHTML=`<div class="badge-ico">${b.ico}</div><div class="badge-name">${b.name}</div>`;
+  bg2.appendChild(d);
+});
+
+/* ══════════════════════════════════════
+   STREAK DAYS
+══════════════════════════════════════ */
+const days=['M','T','W','T','F','S','S'];
+const streak=document.getElementById('streakDays');
+days.forEach((d,i)=>{
+  const el=document.createElement('div');
+  el.className='streak-day'+(i<6?' done':' today');
+  el.textContent=d;
+  streak.appendChild(el);
+});
+
+/* ══════════════════════════════════════
+   ACTIVITIES
+══════════════════════════════════════ */
+const acts=[
+  {ico:'🧘',text:'5-min breathing',done:true},
+  {ico:'📖',text:'Bedtime story',done:true},
+  {ico:'🌙',text:'Play sleep music',done:false},
+];
+const actEl=document.getElementById('activities');
+acts.forEach(a=>{
+  const d=document.createElement('div');
+  d.className='activity-item';
+  d.innerHTML=`<span class="a-ico">${a.ico}</span>${a.text}<span class="a-check">${a.done?'✅':'⬜'}</span>`;
+  d.onclick=()=>{
+    const ch=d.querySelector('.a-check');
+    ch.textContent=ch.textContent==='✅'?'⬜':'✅';
+  };
+  actEl.appendChild(d);
+});
+
+/* ══════════════════════════════════════
+   RECOMMENDATIONS
+══════════════════════════════════════ */
+const recs=[
+  {ico:'🌧️',bg:'linear-gradient(135deg,#B8E6FF,#D0F0FF)',name:'Rainy Night',desc:'You loved this last Tuesday'},
+  {ico:'🐱',bg:'linear-gradient(135deg,#FFD6E8,#FFE4CC)',name:'Purr & Relax',desc:'Perfect for Sleepy mood'},
+  {ico:'🧚',bg:'linear-gradient(135deg,#E2D4FF,#FFD6E8)',name:'Fairy Forest',desc:'Trending this week ✨'},
+  {ico:'🎵',bg:'linear-gradient(135deg,#FFF3B0,#FFE4CC)',name:'Dreamy Piano',desc:'New · Added today'},
+];
+const rl=document.getElementById('recList');
+recs.forEach(r=>{
+  const d=document.createElement('div');
+  d.className='rec-item';
+  d.innerHTML=`
+    <div class="rec-ico" style="background:${r.bg}">${r.ico}</div>
+    <div class="rec-info">
+      <div class="rec-name">${r.name}</div>
+      <div class="rec-desc">${r.desc}</div>
+    </div>
+    <div class="rec-play">▶</div>`;
+  rl.appendChild(d);
+});
+
+/* ══════════════════════════════════════
+   SIDEBAR PAGE SWITCH
+══════════════════════════════════════ */
+function setPage(btn){
+  document.querySelectorAll('.sb-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+</script>
+</body>
+</html>
