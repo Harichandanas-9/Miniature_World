@@ -1,9 +1,14 @@
 import os
+import io
 import uuid
 import asyncio
 import random
+import urllib.parse
 import urllib.request
 import httpx
+import numpy as np
+from PIL import Image
+import imageio
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -14,9 +19,7 @@ load_dotenv()
 
 app = FastAPI(title="Miniature ASMR Bot")
 
-HF_TOKEN   = os.getenv("HF_TOKEN", "")
 SSL_VERIFY = os.getenv("SSL_VERIFY", "false").lower() != "false"
-# Set DEMO_MODE=true in .env to skip HuggingFace (use when corporate network blocks external APIs)
 DEMO_MODE  = os.getenv("DEMO_MODE", "false").lower() == "true"
 
 def _detect_proxy() -> dict | None:
@@ -39,7 +42,7 @@ def _make_client(**kwargs):
 
 os.makedirs("static/videos", exist_ok=True)
 
-mode_label = "DEMO MODE (no video generation)" if DEMO_MODE else "LIVE MODE (HuggingFace video)"
+mode_label = "DEMO MODE (no video generation)" if DEMO_MODE else "LIVE MODE (Pollinations.ai → video)"
 print(f"[startup] {mode_label}")
 
 
@@ -93,40 +96,43 @@ def build_video_prompt(user_input: str) -> str:
 
 
 # ─────────────────────────────────────────────
-# HuggingFace Inference — text-to-video (free)
+# Pollinations.ai — free image generation
+# Frames are stitched into an MP4 via imageio
 # ─────────────────────────────────────────────
 
-HF_MODEL_URL = (
-    "https://api-inference.huggingface.co/models/"
-    "damo-vilab/text-to-video-ms-1.7b"
-)
+FRAME_COUNT  = 6
+FRAME_FPS    = 2
+FRAME_WIDTH  = 512
+FRAME_HEIGHT = 320
+
+async def _fetch_frame(client: httpx.AsyncClient, prompt: str, seed: int) -> bytes:
+    encoded = urllib.parse.quote(prompt)
+    url = (
+        f"https://image.pollinations.ai/prompt/{encoded}"
+        f"?width={FRAME_WIDTH}&height={FRAME_HEIGHT}&seed={seed}&nologo=true"
+    )
+    resp = await client.get(url)
+    resp.raise_for_status()
+    return resp.content
 
 async def generate_video(prompt: str) -> str:
-    headers = {
-        "Authorization": f"Bearer {HF_TOKEN}",
-        "Content-Type": "application/json",
-    }
-    payload = {
-        "inputs": prompt,
-        "parameters": {"num_frames": 40, "num_inference_steps": 25},
-    }
-    async with _make_client(timeout=300) as client:
-        for _ in range(3):
-            resp = await client.post(HF_MODEL_URL, json=payload, headers=headers)
-            if resp.status_code == 503:
-                wait = int(resp.headers.get("X-Wait-For-Model", "20"))
-                await asyncio.sleep(min(wait, 30))
-                continue
-            resp.raise_for_status()
-            video_bytes = resp.content
-            if not video_bytes:
-                raise RuntimeError("HuggingFace returned empty video.")
-            filename = f"{uuid.uuid4().hex}.mp4"
-            path = os.path.join("static", "videos", filename)
-            with open(path, "wb") as f:
-                f.write(video_bytes)
-            return f"/static/videos/{filename}"
-    raise TimeoutError("HuggingFace model timed out. Try again in ~30 seconds.")
+    seeds = [random.randint(1, 99999) + i * 1000 for i in range(FRAME_COUNT)]
+
+    async with _make_client(timeout=120) as client:
+        # Fetch all frames concurrently
+        frame_bytes_list = await asyncio.gather(
+            *[_fetch_frame(client, prompt, seed) for seed in seeds]
+        )
+
+    frames = []
+    for fb in frame_bytes_list:
+        img = Image.open(io.BytesIO(fb)).convert("RGB").resize((FRAME_WIDTH, FRAME_HEIGHT))
+        frames.append(np.array(img))
+
+    filename = f"{uuid.uuid4().hex}.mp4"
+    path = os.path.join("static", "videos", filename)
+    imageio.mimsave(path, frames, fps=FRAME_FPS, codec="libx264", quality=8)
+    return f"/static/videos/{filename}"
 
 
 # ─────────────────────────────────────────────
@@ -144,7 +150,6 @@ async def chat(req: ChatRequest):
         return JSONResponse({"type": "error", "error": "Empty input."}, status_code=400)
 
     try:
-        # Guardrail (local, no network)
         if not is_allowed(user_input):
             return JSONResponse({
                 "type": "refusal",
@@ -156,24 +161,33 @@ async def chat(req: ChatRequest):
                 )
             })
 
-        # Prompt builder (local, no network)
         video_prompt = build_video_prompt(user_input)
 
-        # Demo mode — skip HuggingFace, return prompt preview
         if DEMO_MODE:
             return JSONResponse({
                 "type": "demo",
                 "prompt": video_prompt,
                 "message": (
                     "✅ Guardrails passed! Your ASMR video prompt is ready.\n\n"
-                    "🎬 In production this generates a real video via HuggingFace.\n\n"
+                    "🎬 In production this generates a real video via Pollinations.ai.\n\n"
                     f"📝 Prompt:\n{video_prompt}"
                 )
             })
 
-        # Live mode — call HuggingFace
-        video_url = await generate_video(video_prompt)
-        return JSONResponse({"type": "video", "prompt": video_prompt, "video_url": video_url})
+        try:
+            video_url = await generate_video(video_prompt)
+            return JSONResponse({"type": "video", "prompt": video_prompt, "video_url": video_url})
+        except Exception as err:
+            print(f"[video] failed: {err} — falling back to demo response")
+            return JSONResponse({
+                "type": "demo",
+                "prompt": video_prompt,
+                "message": (
+                    "✅ Guardrails passed! Your ASMR video prompt is ready.\n\n"
+                    "🎬 Video generation is temporarily unavailable.\n\n"
+                    f"📝 Prompt that would be used:\n{video_prompt}"
+                )
+            })
 
     except Exception as e:
         return JSONResponse({"type": "error", "error": str(e)}, status_code=500)
@@ -184,6 +198,7 @@ async def chat(req: ChatRequest):
 # ─────────────────────────────────────────────
 
 @app.get("/", response_class=HTMLResponse)
+@app.head("/")
 async def root():
     with open("static/index.html", encoding="utf-8") as f:
         return HTMLResponse(f.read())
